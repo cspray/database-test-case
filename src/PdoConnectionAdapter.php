@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Cspray\DatabaseTestCase;
 
@@ -13,7 +13,7 @@ if (! extension_loaded('pdo')) {
     throw new MissingRequiredExtension('You must enable ext-pdo to use the ' . PdoConnectionAdapter::class);
 }
 
-final class PdoConnectionAdapter implements ConnectionAdapter {
+final class PdoConnectionAdapter extends AbstractConnectionAdapter {
 
     private ?PDO $connection = null;
 
@@ -49,59 +49,22 @@ final class PdoConnectionAdapter implements ConnectionAdapter {
         $this->connection = null;
     }
 
-    public function loadFixture(Fixture $fixture, Fixture ...$additionalFixture) : void {
-        /** @var Fixture $f */
-        foreach ([$fixture, ...$additionalFixture] as $f) {
-            foreach ($f->getFixtureRecords() as $fixtureRecord) {
-                $statement = $this->connection->prepare($this->generateInsertSqlForParameters($fixtureRecord));
-                foreach ($fixtureRecord->parameters as $col => $val) {
-                    $statement->bindValue($col, $val);
-                }
-                $statement->execute();
-            }
-        }
-    }
 
     public function getUnderlyingConnection() : PDO {
         return $this->connection;
     }
 
-    public function getTable(string $name) : Table {
-        try {
-            $query = sprintf('SELECT * FROM %s', $name);
-            $result = $this->connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
-            $table = Table::forName($name);
-            foreach ($result as $row) {
-                $r = null;
-                foreach ($row as $col => $val) {
-                    $r = $r === null ? Row::forValue($col, $val) : $r->withValue($col, $val);
-                }
-                $table = $table->withRow($r);
-            }
-            return $table;
-        } catch (PDOException $pdoException) {
-            throw new UnableToGetTable(
-                message: sprintf('Unable to fetch table "%s", please check previous Exception for more details.', $name),
-                previous: $pdoException
-            );
+
+    protected function executeInsertSql(string $sql, array $parameters) : void {
+        $statement = $this->getUnderlyingConnection()->prepare($sql);
+        foreach ($parameters as $col => $val) {
+            $statement->bindValue($col, $val);
         }
+        $statement->execute();
     }
 
-    private function generateInsertSqlForParameters(FixtureRecord $fixtureRecord) : string {
-        $table = $fixtureRecord->table;
-        $parameters = $fixtureRecord->parameters;
-        $colsString = implode(
-            ', ',
-            array_keys($parameters)
-        );
-        $paramString = implode(
-            ', ',
-            array_map(static fn(string $col) => ':' . $col, array_keys($parameters))
-        );
-        return <<<SQL
-INSERT INTO $table ($colsString)
-VALUES ($paramString)
-SQL;
+    protected function executeSelectAllSql(string $table) : array {
+        $query = sprintf('SELECT * FROM %s', $table);
+        return $this->connection->query($query)->fetchAll(PDO::FETCH_ASSOC);
     }
-
 }

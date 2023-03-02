@@ -4,6 +4,6 @@ namespace Cspray\DatabaseTestCase\Exception;
 
 use RuntimeException;
 
-final class InvalidFixture extends RuntimeException {
+final class MissingRequiredComposerPackage extends RuntimeException {
 
 }
