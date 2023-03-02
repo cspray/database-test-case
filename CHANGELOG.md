@@ -7,10 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased Changes
 
+## [0.2.0](https://github.com/cspray/database-test-case/releases/tag/0.2.0) - 2023-03-02
+
 ### Added
 
 - Introduces a `Cspray\DatabaseTestCase\AbstractConnectionAdapter` for implementing functionality common across all `Cspray\DatabaseTestCase\ConnectionAdapter` implementations.
 - Provides the `Cspray\DatabaseTestCase\AmpPostgresConnectionAdapter` for working with the amphp/postgres library.
+- Adds support for MySQL in `Cspray\DatabaseTestCase\PdoConnecitonAdapter`. The enum `Cspray\DatabaseTestCase\PdoDriver` has been updated to include this new option.
 
 ### Changed
 
