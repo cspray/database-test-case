@@ -122,12 +122,12 @@ we must do something in all the normally used PHPUnit `TestCase` hooks. To be cl
 To make sure that `DatabaseTestCase` processes these hooks correctly they have been marked as `final`. There are new 
 methods that have been provided that allow for the same effective hooks.
 
-| Old Hook | New Hook |
-| --- | --- |
-| `TestCase::setUpBeforeClass` | `DatabaseTestCase::beforeAll` |
+| Old Hook | New Hook                       |
+| --- |--------------------------------|
+| `TestCase::setUpBeforeClass` | `DatabaseTestCase::beforeAll`  |
 | `TestCase::setUp` | `DatabaseTestCase::beforeEach` |
-| `TestCase::tearDown` | | `DatabaseTestCase::afterEach` |
-| `TestCase::tearDownAfterClass` | `DatabaseTestCase::afterAll` |
+| `TestCase::tearDown` |  `DatabaseTestCase::afterEach` |
+| `TestCase::tearDownAfterClass` | `DatabaseTestCase::afterAll`   |
 
 ## Database Connections
 
