@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  postgres:
+    build:
+      context: .
+      dockerfile: docker/postgres/Dockerfile
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    networks:
+      databasetestcase:
+
+  tests:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+      target: app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./src:/app/src
+      - ./tests:/app/tests
+      - ./resources:/app/resources
+      - ./phpunit.xml:/app/phpunit.xml
+      - ./composer.json:/app/composer.json
+    networks:
+      databasetestcase:
+
+networks:
+  databasetestcase:
+
+volumes:
+  pgdata:

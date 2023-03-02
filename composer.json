@@ -1,0 +1,32 @@
+{
+  "name": "cspray/database-test-case",
+  "description": "A PHPUnit TestCase for asserting expectations on a database",
+  "type": "library",
+  "keywords": [
+    "testing",
+    "database"
+  ],
+  "license": ["MIT"],
+  "require": {
+    "php": "^8.2",
+    "phpunit/phpunit": "^10.0"
+  },
+  "require-dev": {
+    "ext-pdo": "*",
+    "ext-pdo_pgsql": "*",
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "Cspray\\DatabaseTestCase\\": "src"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Cspray\\DatabaseTestCase\\Tests\\": "tests"
+    }
+  },
+  "suggest": {
+    "ext-pdo": "To enable the PdoConnectionAdapter"
+  }
+}
