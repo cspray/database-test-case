@@ -4,7 +4,7 @@ RUN apt-get update -y \
     && apt-get upgrade -y
 
 RUN apt-get install git libsodium-dev libzip-dev libpq-dev -y
-RUN docker-php-ext-install sodium zip pdo pdo_pgsql pgsql
+RUN docker-php-ext-install sodium zip pdo pdo_pgsql pdo_mysql pgsql
 
 RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
 

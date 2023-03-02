@@ -13,6 +13,21 @@ services:
     networks:
       databasetestcase:
 
+  mysql:
+    build:
+      context: .
+      dockerfile: docker/mysql/Dockerfile
+    volumes:
+      - mysqldata:/var/lib/mysql
+    restart: unless-stopped
+    environment:
+      - MYSQL_DATABASE=mysql
+      - MYSQL_USER=mysql
+      - MYSQL_PASSWORD=mysql
+      - MYSQL_ROOT_PASSWORD=mysql
+    networks:
+      databasetestcase:
+
   tests:
     build:
       context: .
@@ -20,6 +35,8 @@ services:
       target: app
     depends_on:
       postgres:
+        condition: service_healthy
+      mysql:
         condition: service_healthy
     volumes:
       - ./src:/app/src
@@ -34,4 +51,5 @@ networks:
   databasetestcase:
 
 volumes:
+  mysqldata:
   pgdata:
