@@ -7,7 +7,7 @@ use Amp\Postgres\PostgresLink;
 use Cspray\DatabaseTestCase\Exception\MissingRequiredComposerPackage;
 use function Amp\Postgres\connect;
 
-if (! class_exists(PostgresLink::class)) {
+if (! interface_exists(PostgresLink::class)) {
     throw new MissingRequiredComposerPackage('You must install amphp/postgres to use ' . AmpPostgresConnectionAdapter::class);
 }
 
