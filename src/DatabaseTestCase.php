@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Cspray\DatabaseTestCase;
 
@@ -7,9 +7,6 @@ use Cspray\DatabaseTestCase\Exception\ConnectionNotYetEstablished;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
-/**
- *
- */
 abstract class DatabaseTestCase extends TestCase {
 
     private static ?ConnectionAdapter $connectionAdapter;
