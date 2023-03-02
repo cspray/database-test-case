@@ -7,6 +7,8 @@
     "database"
   ],
   "license": ["MIT"],
+  "minimum-stability": "beta",
+  "prefer-stable": true,
   "require": {
     "php": "^8.2",
     "phpunit/phpunit": "^10.0"
@@ -14,6 +16,7 @@
   "require-dev": {
     "ext-pdo": "*",
     "ext-pdo_pgsql": "*",
+    "amphp/postgres": "^v2.0.0-beta.2",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {
@@ -27,6 +30,7 @@
     }
   },
   "suggest": {
-    "ext-pdo": "To enable the PdoConnectionAdapter"
+    "ext-pdo": "To enable the PdoConnectionAdapter",
+    "amphp/postgres": "To enable the AmpPostgresConnectionAdapter"
   }
 }
