@@ -131,12 +131,12 @@ methods that have been provided that allow for the same effective hooks.
 
 ## Database Connections
 
-| Connection Instance         | Library                           | Database  | Implemented        | 
-|-----------------------------|-----------------------------------|-----------|--------------------|
-| `PDO`                       | [PHP PDO][pdo]                    | PostgreSQL | :white_check_mark: |
-| `PDO`                       | [PHP PDO][pdo]                    | MySQL     | :x:                |
-| `Amp\Postgres\PostgresLink` | [amphp/postgres@^2][amp-postgres] | PostgreSQL | :x:                | 
-| `Amp\Mysql\MysqlLink` | [amphp/mysql@^3][amp-mysql] | MySQL | :x: |
+| Connection Adapter                                     | Connection Instance         | Library                           | Database  | Implemented | 
+|--------------------------------------------------------|-----------------------------|-----------------------------------|-----------|------------|
+| `Cspray\DatabaseTestCase\PdoConnectionAdapter`         | `PDO`                       | [PHP PDO][pdo]                    | PostgreSQL | :white_check_mark: |
+| `Cspray\DatabaseTestCase\PdoConnectionAdapter`         | `PDO`                       | [PHP PDO][pdo]                    | MySQL     | :white_check_mark: |
+| `Cspray\DatabaseTestCase\AmpPostgresConnectionAdapter` | `Amp\Postgres\PostgresLink` | [amphp/postgres@^2][amp-postgres] | PostgreSQL | :white_check_mark: | 
+| |  `Amp\Mysql\MysqlLink`      | [amphp/mysql@^3][amp-mysql]  | MySQL | :x:                |
 
 [amp-mysql]: https://github.com/amphp/mysql
 [amp-postgres]: https://github.com/amphp/postgres
