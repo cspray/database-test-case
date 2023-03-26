@@ -50,8 +50,7 @@ class AmpPostgresConnectionAdapter extends AbstractConnectionAdapter {
     }
 
     protected function executeInsertSql(string $sql, array $parameters) : void {
-        $statement = $this->connection->prepare($sql);
-        $statement->execute($parameters);
+        $this->connection->execute($sql, $parameters);
     }
 
     protected function executeSelectAllSql(string $table) : array {
