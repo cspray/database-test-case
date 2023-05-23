@@ -6,7 +6,9 @@ use Cspray\DatabaseTestCase\ConnectionAdapter;
 use Cspray\DatabaseTestCase\DatabaseTestCase;
 use Cspray\DatabaseTestCase\LoadFixture;
 use Cspray\DatabaseTestCase\SingleRecordFixture;
+use PHPUnit\Framework\Attributes\CoversClass;
 
+#[CoversClass(DatabaseTestCase::class)]
 class StubDatabaseTestCase extends DatabaseTestCase {
 
     private static ConnectionAdapter $connectionAdapter;

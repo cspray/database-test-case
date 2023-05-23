@@ -4,6 +4,7 @@ namespace Cspray\DatabaseTestCase;
 
 use Amp\Postgres\PostgresConfig;
 use Amp\Postgres\PostgresLink;
+use Closure;
 use Cspray\DatabaseTestCase\Exception\MissingRequiredComposerPackage;
 use function Amp\Postgres\connect;
 
@@ -15,21 +16,29 @@ class AmpPostgresConnectionAdapter extends AbstractConnectionAdapter {
 
     private ?PostgresLink $connection = null;
 
-    public function __construct(
-        private readonly ConnectionAdapterConfig $adapterConfig
+    private function __construct(
+        private readonly Closure $connectionFactory
     ) {}
 
-    public function establishConnection() : void {
-        $this->connection = connect(
+    public static function newConnectionFromConfig(ConnectionAdapterConfig $config) : self {
+        return new self(fn() => connect(
             PostgresConfig::fromString(sprintf(
                 'db=%s host=%s port=%d user=%s pass=%s',
-                $this->adapterConfig->database,
-                $this->adapterConfig->host,
-                $this->adapterConfig->port,
-                $this->adapterConfig->user,
-                $this->adapterConfig->password
+                $config->database,
+                $config->host,
+                $config->port,
+                $config->user,
+                $config->password
             ))
-        );
+        ));
+    }
+
+    public static function existingConnection(PostgresLink $link) : self {
+        return new self(fn() => $link);
+    }
+
+    public function establishConnection() : void {
+        $this->connection = ($this->connectionFactory)();
     }
 
     public function onTestStart() : void {
