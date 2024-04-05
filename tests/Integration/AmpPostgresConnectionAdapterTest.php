@@ -22,6 +22,6 @@ class AmpPostgresConnectionAdapterTest extends ConnectionAdapterTestCase {
     }
 
     protected static function getConnectionAdapter() : ConnectionAdapter {
-        return AmpPostgresConnectionAdapter::newConnectionFromConfig(new PostgresConnectionConfig());
+        return AmpPostgresConnectionAdapter::fromConnectionConfig(new PostgresConnectionConfig());
     }
 }
