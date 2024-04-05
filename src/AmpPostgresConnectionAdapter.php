@@ -20,7 +20,7 @@ class AmpPostgresConnectionAdapter extends AbstractConnectionAdapter {
         private readonly Closure $connectionFactory
     ) {}
 
-    public static function newConnectionFromConfig(ConnectionAdapterConfig $config) : self {
+    public static function fromConnectionConfig(ConnectionAdapterConfig $config) : self {
         return new self(fn() => connect(
             PostgresConfig::fromString(sprintf(
                 'db=%s host=%s port=%d user=%s pass=%s',
@@ -33,7 +33,7 @@ class AmpPostgresConnectionAdapter extends AbstractConnectionAdapter {
         ));
     }
 
-    public static function existingConnection(PostgresLink $link) : self {
+    public static function fromExistingConnection(PostgresLink $link) : self {
         return new self(fn() => $link);
     }
 
