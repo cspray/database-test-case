@@ -24,7 +24,7 @@ class MysqlPdoConnectionAdapterTest extends ConnectionAdapterTestCase {
     }
 
     protected static function getConnectionAdapter() : ConnectionAdapter {
-        return new PdoConnectionAdapter(
+        return PdoConnectionAdapter::fromConnectionConfig(
             new ConnectionAdapterConfig(
                 'mysql',
                 'mysql',

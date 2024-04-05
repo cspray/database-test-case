@@ -1,4 +1,4 @@
-FROM php:8.2.1-zts-bullseye AS php
+FROM php:8.3-zts-bullseye AS php
 
 RUN apt-get update -y \
     && apt-get upgrade -y

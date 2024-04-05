@@ -17,27 +17,30 @@ final class PdoConnectionAdapter extends AbstractConnectionAdapter {
 
     private ?PDO $connection = null;
 
-    public function __construct(
-        private readonly ConnectionAdapterConfig $adapterConfig,
-        private readonly PdoDriver $pdoDriver
-    ) {}
+    /** @var callable */
+    private $pdoSupplier;
+
+    private readonly PdoDriver $pdoDriver;
+
+    private function __construct(callable $pdoSupplier, PdoDriver $pdoDriver) {
+        $this->pdoSupplier = $pdoSupplier;
+        $this->pdoDriver = $pdoDriver;
+    }
+
+    public static function fromConnectionConfig(ConnectionAdapterConfig $adapterConfig, PdoDriver $pdoDriver) : self {
+        return self::fromExistingConnection(new PDO($pdoDriver->dsn($adapterConfig)), $pdoDriver);
+    }
+
+    public static function fromExistingConnection(PDO $pdo, PdoDriver $pdoDriver) : self {
+        return new self(static fn() => $pdo, $pdoDriver);
+    }
 
     public function establishConnection() : void {
-        $this->connection = new PDO(
-            sprintf(
-                '%s:host=%s;port=%d;dbname=%s;user=%s;password=%s',
-                $this->pdoDriver->getDsnIdentifier(),
-                $this->adapterConfig->host,
-                $this->adapterConfig->port,
-                $this->adapterConfig->database,
-                $this->adapterConfig->user,
-                $this->adapterConfig->password
-            )
-        );
+        $this->connection = ($this->pdoSupplier)();
     }
 
     public function onTestStart() : void {
-        $this->connection->query('START TRANSACTION');
+        $this->connection->query($this->pdoDriver->startTransactionSql());
     }
 
     public function onTestStop() : void {
