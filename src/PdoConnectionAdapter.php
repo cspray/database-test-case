@@ -2,12 +2,9 @@
 
 namespace Cspray\DatabaseTestCase;
 
-use Cspray\DatabaseTestCase\DatabaseRepresentation\Row;
-use Cspray\DatabaseTestCase\DatabaseRepresentation\Table;
-use Cspray\DatabaseTestCase\Exception\UnableToGetTable;
+use Closure;
 use Cspray\DatabaseTestCase\Exception\MissingRequiredExtension;
 use PDO;
-use PDOException;
 
 if (! extension_loaded('pdo')) {
     throw new MissingRequiredExtension('You must enable ext-pdo to use the ' . PdoConnectionAdapter::class);
@@ -17,15 +14,10 @@ final class PdoConnectionAdapter extends AbstractConnectionAdapter {
 
     private ?PDO $connection = null;
 
-    /** @var callable */
-    private $pdoSupplier;
-
-    private readonly PdoDriver $pdoDriver;
-
-    private function __construct(callable $pdoSupplier, PdoDriver $pdoDriver) {
-        $this->pdoSupplier = $pdoSupplier;
-        $this->pdoDriver = $pdoDriver;
-    }
+    private function __construct(
+        private readonly Closure $pdoSupplier,
+        private readonly PdoDriver $pdoDriver
+    ) {}
 
     public static function fromConnectionConfig(ConnectionAdapterConfig $adapterConfig, PdoDriver $pdoDriver) : self {
         return self::fromExistingConnection(new PDO($pdoDriver->dsn($adapterConfig)), $pdoDriver);
