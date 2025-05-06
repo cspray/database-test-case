@@ -1,6 +1,6 @@
 <?php
 
-namespace Cspray\DatabaseTestCase\DatabaseRepresentation;
+namespace Cspray\DatabaseTesting\DatabaseRepresentation;
 
 use Countable;
 use IteratorAggregate;
@@ -8,35 +8,16 @@ use Traversable;
 
 /**
  * Represents a single table in a relational database.
+ *
+ * @api
+ * @template-extends IteratorAggregate<int, Row>
  */
-final class Table implements Countable, IteratorAggregate {
+interface Table extends Countable, IteratorAggregate {
 
-    private function __construct(
-        private readonly string $name,
-        private readonly array $rows = []
-    ) {}
+    public function name() : string;
 
-    public static function forName(string $name) : self {
-        return new self($name);
-    }
+    public function row(int $index) : ?Row;
 
-    public function withRow(Row $row) : self {
-        return new self($this->name, [...$this->rows, $row]);
-    }
+    public function reload() : void;
 
-    public function getName() : string {
-        return $this->name;
-    }
-
-    public function getRow(int $index) : ?Row {
-        return $this->rows[$index] ?? null;
-    }
-
-    public function getIterator() : Traversable {
-        yield from $this->rows;
-    }
-
-    public function count() : int {
-        return count($this->rows);
-    }
 }

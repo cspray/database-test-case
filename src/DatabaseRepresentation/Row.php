@@ -1,33 +1,18 @@
 <?php declare(strict_types=1);
 
-namespace Cspray\DatabaseTestCase\DatabaseRepresentation;
+namespace Cspray\DatabaseTesting\DatabaseRepresentation;
 
 use IteratorAggregate;
 use Traversable;
 
 /**
- * Represents
+ * @api
+ * @template-extends IteratorAggregate<non-empty-string, mixed>
  */
-final class Row implements IteratorAggregate {
+interface Row extends IteratorAggregate {
 
-    private function __construct(
-        private readonly array $columnValues
-    ) {}
+    public function get(string $name) : mixed;
 
-    public static function forValue(string $name, mixed $value) : self {
-        return new self([$name => $value]);
-    }
-
-    public function withValue(string $name, mixed $value) : self {
-        return new self([...$this->columnValues, $name => $value]);
-    }
-
-    public function get(string $name) : mixed {
-        return $this->columnValues[$name];
-    }
-
-    public function getIterator() : Traversable {
-        yield from $this->columnValues;
-    }
+    public function getIterator() : Traversable;
 
 }

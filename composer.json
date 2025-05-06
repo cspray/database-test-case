@@ -1,36 +1,29 @@
 {
-  "name": "cspray/database-test-case",
-  "description": "A PHPUnit TestCase for asserting expectations on a database",
+  "name": "cspray/database-testing",
+  "description": "",
   "type": "library",
   "keywords": [
     "testing",
     "database"
   ],
   "license": ["MIT"],
-  "minimum-stability": "beta",
   "prefer-stable": true,
   "require": {
-    "php": "^8.2",
-    "phpunit/phpunit": "^10.0"
+    "php": "^8.3"
   },
   "require-dev": {
-    "ext-pdo": "*",
-    "ext-pdo_pgsql": "*",
-    "amphp/postgres": "^v2.0.0-beta.2",
+    "phake/phake": "^4.5",
+    "phpunit/phpunit": "^11.0",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {
     "psr-4": {
-      "Cspray\\DatabaseTestCase\\": "src"
+      "Cspray\\DatabaseTesting\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Cspray\\DatabaseTestCase\\Tests\\": "tests"
+      "Cspray\\DatabaseTesting\\Tests\\": "tests"
     }
-  },
-  "suggest": {
-    "ext-pdo": "To enable the PdoConnectionAdapter",
-    "amphp/postgres": "To enable the AmpPostgresConnectionAdapter"
   }
 }

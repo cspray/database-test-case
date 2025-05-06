@@ -1,143 +1,94 @@
-# DatabaseTestCase
+# cspray/database-testing
 
-A library to facilitate testing database interactions using PHPUnit 10+.
+A low-level, framework-agnostic library for setting up a database suitable 
+for automated tests. This library provides the following features:
 
-Features this library currently provides:
+- The `Cspray\DatabaseTesting\ConnectionAdapter` interface that defines how this library,
+  and those that extend it, interact with your database.
+- Comprehensive, customizable strategies for cleaning up your database to ensure each 
+  test works with a known state.
+- Declare fixtures, sets of database records, that are loaded for each test.
+- A simple interface to easily introspect the contents of a database
+  table in your test suite.
+- Database and testing-framework agnostic approach
 
-- Handles typical database setup and teardown
-- Simple representation of a table's rows
-- Mechanism for loading fixture data specific to each test
+It cannot be emphasized enough; this library does not provide a turn-key, usable solution 
+out-of-the-box. If you use this library directly, instead of one of the extensions that 
+targets a specific database connection and testing framework, you'll need to ensure the 
+appropriate concrete implementations and framework integration points are created.
 
-Features this library **does not** currently provide, but plans to:
+## Complete Libraries
 
-- Semantic assertions on the state of a database
-- Representation for the information schema of a given table
+Instead of installing this library directly, we recommend that you install one of the 
+available options from the "Connection Adapter" and "Testing Extension" list. Chances are, 
+you'll need both. If you don't see your database connection type or testing framework
+listed, please submit an issue to this repository!
 
-The rest of this document details how to install this library, make use of its `TestCase`, and what database 
-connection objects are supported out-of-the-box.
+### Connection Adapter
 
-## Installation
+- [cspray/database-testing-pdo](https://github.com/cspray/database-testing-pdo)
 
-[Composer](https://getcomposer.org/) is the only supported method for installing this library.
+### Testing Extension
 
-```
-composer require --dev cspray/database-test-case
-```
+- [cspray/database-testing-phpunit](https://github.com/cspray/database-testing-phpunit)
 
-## Usage Guide
+## Quick Example
 
-Using this library starts by creating a PHPUnit test that extends `Cspray\DatabaseTestCase\DatabaseTestCase`. This class 
-overrides various setup and teardown functions provided by PHPUnit to ensure that a database connection is established 
-and that database interactions happen against a known state. The `DatabaseTestCase` requires implementations 
-to provide a `Cspray\DatabaseTestCase\ConnectionAdapter`. This implementation is ultimately responsible for calls to the 
-database required by the testing framework. The `ConnectionAdapter` also provides access to the underlying connection, 
-for example a `PDO` instance, that you can use in your code under test. Check out the section titled "Database Connections" 
-for `ConnectionAdapter` instances supported out-of-the-box and how you could implement your own.
-
-In our example, going to assume that you have a PostgreSQL database with a table that has 
-the following DDL:
-
-```postgresql
-CREATE TABLE my_table (
-    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    username VARCHAR(255),
-    email VARCHAR(255),
-    is_active BOOLEAN
-)
-```
-
-Now, we can write a series of tests that interact with the database.
+This example is intended to reflect what should be capable with this library. We're going to 
+use PHPUnit as our testing framework, it is ubiquitous and likely the framework you'll start off 
+using with this library.
 
 ```php
 <?php declare(strict_types=1);
 
-namespace Cspray\DatabaseTestCase\Demo;
+namespace Cspray\DatabaseTesting\Demo;
 
-use Cspray\DatabaseTestCase\DatabaseRepresentation\Row;use Cspray\DatabaseTestCase\DatabaseTestCase;
-use Cspray\DatabaseTestCase\LoadFixture;use Cspray\DatabaseTestCase\SingleRecordFixture;use PDO;
+use Cspray\DatabaseTesting\DatabaseCleanup\TransactionWithRollback;
+use Cspray\DatabaseTesting\Fixture\LoadFixture;
+use Cspray\DatabaseTesting\Fixture\SingleRecordFixture;
+use Cspray\DatabaseTesting\RequiresTestDatabase;
+use Cspray\DatabaseTesting\TestDatabase;
+use PHPUnit\Framework\TestCase;
+use PDO;
 
-class MyDemoTest extends DatabaseTestCase {
+#[RequiresTestDatabase(
+    // this should be implemented by you or provided by an extension to this library
+    new MyPdoConnectionAdapterFactory(),
+    
+    // you could also use Cspray\DatabaseTesting\DatabaseCleanup\TruncateTables
+    // or implement your own Cspray\DatabaseTesting\DatabaseCleanup\CleanupStrategy
+    new TransactionWithRollback()
+)]
+final class RepositoryTest extends TestCase {
 
-    // Generally speaking you shouldn't call this method yourself!
-    protected static function getConnectionAdapter() : ConnectionAdapter {
-        // Be sure to change these configuration values to match your test setup!
-        return new PdoConnectionAdapter(
-            new ConnectionAdapterConfig(
-                database: 'postgres',
-                host: 'localhost',
-                port: 5432,
-                user: 'postgres',
-                password: 'postgres'
-            ),
-            PdoDriver::Postgresql
-        );
+    private PDO $pdo;
+    private MyRepository $myRepository;
+
+    protected function setUp() : void {
+        // be sure to use the connection from TestDatabase! depending on CleanupStrategy,
+        // using a different connection could wind up with a dirty database state
+        $this->pdo = TestDatabase::connection();
+        $this->myRepository = new MyRepository($this->pdo);
     }
     
-    public function testUnderlyingConnection() : void {
-        // You'd pass the value of this method into your code under test
-        // Use a different ConnectionAdapter if you aren't working with PDO!
-        self::assertInstanceOf(PDO::class, self::getUnderlyingConnection());
-    }
-    
-    public function testShowEmptyTable() : void {
-        // DatabaseTestCase provides a method to get a representation of a database table
-        $table = $this->getTable('my_table');
-        
-        // The $table is Countable, the count represents the number of rows in the table
-        self::assertCount(0, $table);
-        
-        // The $table is iterable, each iteration yields a Row, but our database is empty!
-        self::assertSame([], iterator_to_array($table));
-    }
-    
-    // Pass any number of Fixture to have corresponding FixtureRecords inserted into 
-    // the database before your test starts
+    // populate with more appropriate data. recommended to implement your own 
+    // Cspray\DatabaseTesting\Fixture\Fixture to reuse datasets across tests
     #[LoadFixture(
-        new SingleRecordFixture('my_table', ['username' => 'cspray', 'email' => 'cspray@example.com', 'is_active' => true]),
-        new SingleRecordFixture('my_table', ['username' => 'dyana', 'email' => 'dyana@example.com', 'is_active' => true])
+        new SingleRecordFixture('my_table', [
+            'name' => 'cspray',
+            'website' => 'https://cspray.io'
+        ])
     )]
-    public function testLoadingFixtures() : void {
-        $table = $this->getTable('my_table');
+    public function testTableHasCorrectlyLoadedFixtures() : void {
+        $table = TestDatabase::table('my_table');
         
-        self::assertCount(2, $table);
-        self::assertContainsOnlyInstancesOf(Row::class, iterator_to_array($table));
-        self::assertSame('cspray', $table->getRow(0)->get('username'));
-        self::assertSame('dyana@example.com', $table->getRow(1)->get('email'));
-        self::assertNull($table->getRow(2));
+        self::assertCount(1, $table);
+        
+        self::assertSame('cspray', $table->row(0)->get('name'))
+        self::assertSame('website', $table->row(0)->get('website'));
     }
-    
+
 }
 ```
 
-### TestCase Hooks
 
-There are several critical things the `DatabaseTestCase` must take care of for database tests to work properly. To do that 
-we must do something in all the normally used PHPUnit `TestCase` hooks. To be clear those methods are:
-
-- `TestCase::setUpBeforeClass`
-- `TestCase::setUp`
-- `TestCase::tearDown`
-- `TestCase::tearDownAfterClass`
-
-To make sure that `DatabaseTestCase` processes these hooks correctly they have been marked as `final`. There are new 
-methods that have been provided that allow for the same effective hooks.
-
-| Old Hook | New Hook                       |
-| --- |--------------------------------|
-| `TestCase::setUpBeforeClass` | `DatabaseTestCase::beforeAll`  |
-| `TestCase::setUp` | `DatabaseTestCase::beforeEach` |
-| `TestCase::tearDown` |  `DatabaseTestCase::afterEach` |
-| `TestCase::tearDownAfterClass` | `DatabaseTestCase::afterAll`   |
-
-## Database Connections
-
-| Connection Adapter                                     | Connection Instance         | Library                           | Database  | Implemented | 
-|--------------------------------------------------------|-----------------------------|-----------------------------------|-----------|------------|
-| `Cspray\DatabaseTestCase\PdoConnectionAdapter`         | `PDO`                       | [PHP PDO][pdo]                    | PostgreSQL | :white_check_mark: |
-| `Cspray\DatabaseTestCase\PdoConnectionAdapter`         | `PDO`                       | [PHP PDO][pdo]                    | MySQL     | :white_check_mark: |
-| `Cspray\DatabaseTestCase\AmpPostgresConnectionAdapter` | `Amp\Postgres\PostgresLink` | [amphp/postgres@^2][amp-postgres] | PostgreSQL | :white_check_mark: | 
-| |  `Amp\Mysql\MysqlLink`      | [amphp/mysql@^3][amp-mysql]  | MySQL | :x:                |
-
-[amp-mysql]: https://github.com/amphp/mysql
-[amp-postgres]: https://github.com/amphp/postgres
-[pdo]: https://php.net/pdo
