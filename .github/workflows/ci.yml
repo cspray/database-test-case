@@ -27,4 +27,4 @@ jobs:
       - name: Unit Testing
         env:
           XDEBUG_MODE: coverage
-        run: ./tools/phpunit/vendor/bin/phpunit
+        run: ./vendor/bin/phpunit
