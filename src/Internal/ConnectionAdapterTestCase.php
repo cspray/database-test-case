@@ -113,11 +113,11 @@ abstract class ConnectionAdapterTestCase extends TestCase {
 
     public function testBeginTransactionAndRollbackResultsInRecordsNotPersisted() : void {
         $this->connectionAdapter->establishConnection();
-//
+
         $sql = 'SELECT * FROM my_table';
-//        $records = $this->executeSelectSql($sql);
-//
-//        self::assertEmpty($records);
+        $records = $this->executeSelectSql($sql);
+
+        self::assertEmpty($records);
 
         $this->connectionAdapter->beginTransaction();
 
@@ -171,29 +171,26 @@ abstract class ConnectionAdapterTestCase extends TestCase {
             new SingleRecordFixture('my_table', ['name' => 'Harry']),
         ]);
 
-        $table = $this->connectionAdapter->selectAll('my_table');
+        $data = $this->connectionAdapter->selectAll('my_table');
 
-        self::assertSame('my_table', $table->name());
-        self::assertCount(1, $table);
-        self::assertSame('Harry', $table->row(0)->get('name'));
+        self::assertCount(1, $data);
+        self::assertSame('Harry', $data[0]['name']);
 
         $this->connectionAdapter->insert([
             new SingleRecordFixture('my_table', ['name' => 'Mack']),
         ]);
 
-        $table->reload();
+        $newData = $this->connectionAdapter->selectAll('my_table');
 
-        self::assertSame('my_table', $table->name());
-        self::assertCount(2, $table);
-        self::assertSame('Harry', $table->row(0)->get('name'));
-        self::assertSame('Mack', $table->row(1)->get('name'));
+        self::assertCount(2, $newData);
+        self::assertSame('Harry', $newData[0]['name']);
+        self::assertSame('Mack', $newData[1]['name']);
 
         $this->connectionAdapter->truncateTable('my_table');
 
-        $table->reload();
+        $truncatedData = $this->connectionAdapter->selectAll('my_table');
 
-        self::assertSame('my_table', $table->name());
-        self::assertCount(0, $table);
+        self::assertCount(0, $truncatedData);
     }
 
 
