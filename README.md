@@ -35,8 +35,7 @@ listed, please submit an issue to this repository!
 ## Quick Example
 
 This example is intended to reflect what should be capable with this library. We're going to 
-use PHPUnit as our testing framework, it is ubiquitous and likely the framework you'll start off 
-using with this library.
+use [cspray/database-testing-phpunit]() as our testing extension, it is ubiquitous and likely the framework you'll start off using with this library.
 
 ```php
 <?php declare(strict_types=1);
@@ -46,8 +45,8 @@ namespace Cspray\DatabaseTesting\Demo;
 use Cspray\DatabaseTesting\DatabaseCleanup\TransactionWithRollback;
 use Cspray\DatabaseTesting\Fixture\LoadFixture;
 use Cspray\DatabaseTesting\Fixture\SingleRecordFixture;
-use Cspray\DatabaseTesting\RequiresTestDatabase;
 use Cspray\DatabaseTesting\TestDatabase;
+use Cspray\DatabaseTesting\PhpUnit\RequiresTestDatabase;
 use PHPUnit\Framework\TestCase;
 use PDO;
 
@@ -86,6 +85,18 @@ final class RepositoryTest extends TestCase {
         
         self::assertSame('cspray', $table->row(0)->get('name'))
         self::assertSame('website', $table->row(0)->get('website'));
+    }
+    
+    public function testTableCanBeReloadedToGetNewlyInsertedRecords() : void {
+        $table = TestDatabase::table('my_table');
+        
+        self::assertCount(0, $table);
+        
+        $this->myRepository->save(new MyEntity());
+    
+        $table->reload();
+        
+        self::assertCount(1, $table);
     }
 
 }

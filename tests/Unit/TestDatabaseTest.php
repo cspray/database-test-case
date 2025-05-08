@@ -200,15 +200,25 @@ final class TestDatabaseTest extends TestCase {
 
     public function testCallingTableWithEstablishedConnectionReturnsTableFromConnectionAdapterCall() : void {
         [$requiresTestDatabase, $connectionAdapter] = $this->defaultMocks();
-        $table = Phake::mock(Table::class);
-        Phake::when($connectionAdapter)->selectAll('table_name')->thenReturn($table);
+        Phake::when($connectionAdapter)->selectAll('table_name')->thenReturn([
+            ['id' => 1, 'name' => 'foo'],
+            ['id' => 2, 'name' => 'bar'],
+            ['id' => 3, 'name' => 'baz'],
+        ]);
 
         $subject = TestDatabase::createFromTestCaseRequiresDatabase(__CLASS__, $requiresTestDatabase);
         $subject->establishConnection();
 
         $actual = TestDatabase::table('table_name');
 
-        self::assertSame($table, $actual);
+        self::assertSame('table_name', $actual->name());
+        self::assertCount(3, $actual);
+        self::assertSame(1, $actual->row(0)->get('id'));
+        self::assertSame('foo', $actual->row(0)->get('name'));
+        self::assertSame(2, $actual->row(1)->get('id'));
+        self::assertSame('bar', $actual->row(1)->get('name'));
+        self::assertSame(3, $actual->row(2)->get('id'));
+        self::assertSame('baz', $actual->row(2)->get('name'));
     }
 
 }

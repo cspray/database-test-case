@@ -24,6 +24,10 @@ interface ConnectionAdapter {
 
     public function rollback() : void;
 
+    /**
+     * @param non-empty-string $table
+     * @return void
+     */
     public function truncateTable(string $table) : void;
 
     /**
@@ -31,6 +35,10 @@ interface ConnectionAdapter {
      */
     public function insert(array $fixtures) : void;
 
-    public function selectAll(string $name) : Table;
+    /**
+     * @param non-empty-string $name
+     * @return list<array<non-empty-string, mixed>>
+     */
+    public function selectAll(string $name) : array;
 
 }
