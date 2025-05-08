@@ -1,6 +1,6 @@
 {
   "name": "cspray/database-testing",
-  "description": "",
+  "description": "A framework-agnostic library for setting up a database suitable for automated testing.",
   "type": "library",
   "keywords": [
     "testing",

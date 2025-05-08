@@ -8,8 +8,12 @@ use Cspray\DatabaseTesting\DatabaseCleanup\CleanupStrategy;
 use Cspray\DatabaseTesting\DatabaseRepresentation\Table;
 use Cspray\DatabaseTesting\Exception\ConnectionAlreadyEstablished;
 use Cspray\DatabaseTesting\Exception\ConnectionNotEstablished;
+use Cspray\DatabaseTesting\Internal\ClosureDataProviderTable;
 
 /**
+ * Represents the public API testing framework extensions should interact with to establish test database connections
+ * and ensure the state of the database before and after tests.
+ *
  * @api
  */
 final class TestDatabase {
@@ -47,7 +51,7 @@ final class TestDatabase {
      */
     public static function table(string $name) : Table {
         self::verifyConnectionEstablished(__METHOD__);
-        return self::$connectionAdapter->selectAll($name);
+        return new ClosureDataProviderTable($name, fn() => self::$connectionAdapter->selectAll($name));
     }
 
     /**
